@@ -38,7 +38,7 @@ document.getElementById("roundForm").addEventListener("submit", async function(e
 
     const formData = new FormData(this);
 
-    let response = await fetch("logic/round.php", {
+    let response = await fetch("logic/Runden.php", {
         method: "POST",
         body: formData
     });
