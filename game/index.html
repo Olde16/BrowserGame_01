@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        <title>Spiel</title>
+    </head>
+<body>
+
+<h3>Spiel Einstellungen:</h3>
+
+<form id="roundForm">
+    <label>
+        <input type="checkbox" name="cbAbsolutMode">
+        Deterministischer Modus
+    </label>
+
+    <h3>Wähle deine Waffe:</h3>
+    <input list="waffen" name="waffe">
+
+    <datalist id="waffen">
+        <option value="Faust">
+        <option value="Dolch">
+        <option value="Schwert">
+        <option value="Laserschwert">
+        <option value="Magie">
+    </datalist>
+
+    <br><br>
+    <button type="submit">Runde starten</button>
+</form>
+
+<p id="output"></p>
+
+<script>
+document.getElementById("roundForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    let response = await fetch("logic/round.php", {
+        method: "POST",
+        body: formData
+    });
+
+    let data = await response.json();
+    document.getElementById("output").innerHTML = data.error || data.text;
+});
+</script>
+
+</body>
+
+</html>
