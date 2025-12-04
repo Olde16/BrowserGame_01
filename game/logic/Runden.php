@@ -1,32 +1,33 @@
 <?php
 session_start();
 
+# Klassenimport
 require_once __DIR__ . '/../classes/Waffenart.php';
 require_once __DIR__ . '/../classes/Charakter.php';
 require_once __DIR__ . '/../classes/Spieler.php';
 require_once __DIR__ . '/../classes/Gegner.php';
 
-$result = [
+$result = [ # Ergebnis vorbereiten
     "error" => null,
     "text" => ""
-];
+]; 
 
-$global__game_deterministic = $_SESSION['cbAbsolutMode'] ?? false;
+$global__game_deterministic = $_SESSION['cbAbsolutMode'] ?? false; # Deterministischer Modus?
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $_SESSION['cbAbsolutMode'] = isset($_POST['cbAbsolutMode']);
     $global__game_deterministic = $_SESSION['cbAbsolutMode'];
 
-    $auswahl = Waffenart::fromString($_POST['waffe'] ?? "");
+    $auswahl = Waffenart::fromString($_POST['waffe'] ?? ""); # Waffenauswahl
 
-    if (!$auswahl) {
+    if (!$auswahl) { # Fehler in Fehlerfeld
         $result["error"] = "Bitte eine gültige Waffe auswählen.";
         echo json_encode($result);
         exit;
     }
 
-    // Spieler & Gegner erstellen
+    # Spieler & Gegner erstellen
     $spieler = new Spieler("Spieler1", 10, 30, 0.5, 0.5);
     $spieler->set_Waffenart($auswahl);
 
@@ -34,11 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gegner->set_Waffenart(Waffenart::FAUST);
     $gegner->set_blockWahl("oben");
 
-    // Berechnung
+    # Berechnung
     $schadA = $spieler->get_aschaden_aus_angriffswerte();
     $schadV = $gegner->get_vschaden_aus_verteidigungswerte($schadA);
 
-    $result["text"] =
+    $result["text"] = # Ergebnis in Textfeld
         "Du greifst mit <b>{$auswahl->get_bezeichnung()}</b> an und machst <b>$schadA</b> Schaden. " .
         "Der Gegner blockt und erleidet <b>$schadV</b> Schaden.";
 
