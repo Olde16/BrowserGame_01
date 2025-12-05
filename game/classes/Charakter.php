@@ -8,6 +8,7 @@
         private float $Intelligenz; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private Waffenart $Waffenart; // Ausgerustete Waffe
         private string $blockWahl;
+        private string $angriffsrichtung;
 
         public function get_Name(): string{
             return $this->Name;
@@ -51,6 +52,13 @@
         public function set_blockWahl(string $value): void{
             $this->blockWahl = $value;
         }
+        public function get_Angriffsrichtung() : string {
+            return $this->angriffsrichtung;
+        }
+        public function set_Angriffsrichtung(string $value) : void {
+            $this->angriffsrichtung = $value;
+        }
+
         public function __construct(string $v_Name, int $v_Lebenspunkte,float $v_Staerke = 0, float $v_Geschick = 0, float $v_Intelligenz = 0, Waffenart $v_Waffenart = Waffenart::FAUST, string $v_blockwahl = "oben"){
             $this->Name = $v_Name;
             $this->Lebenspunkte = $v_Lebenspunkte;
@@ -68,6 +76,14 @@
         }
         public function get_vschaden_aus_verteidigungswerte(int $schaden_aus_angriffswert): int{ // ermittelt den von den Verteidigungswerten abhangigen verbleibenden Schaden, Schaden aus Angriff als Eigenschaft des Angreifers
              return (int)($schaden_aus_angriffswert - (($schaden_aus_angriffswert * $this->get_block_effektivwert()) + $this->Intelligenz )); // Blockrichtung (effektivwert) als Eigenschaft des Angegriffenen
+        }
+        # Charaktere koennen Gegner oder Spieler sein. Um die Implementierung des Angriff und Verteidigung so einfach wie moeglich zu gestalten wurde sich dafuer entschieden, 
+        # die Angriff (get_aschaden_aus_angriffswerte) und Verteidigung Funktion (get_vschaden_aus_verteidigungswerten) in die Klasse Charakter mit einzubauen.
+        # Das bietet den Vorteil: Im Programmcode werden mit Aufruf der Funktionen automatisch die korrekten Verteidigungs bzw. Angriffswerte aus den eigenen Eigenschaften ermittelt.
+        # So muss nicht wiederholt eine Berechnung gestartet und auf verschiedene Werte zugegriffen werden, sondern lediglich die dafür vorbereiteten Funktionen aufgerufen werden.
+        # Das macht das Spiel dynamischer in Gestaltungsspielraum.
+        private function get_attk_effectiveness() : float {
+            
         }
         private function get_block_effektivwert():float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
             global $global__game_deterministic;
