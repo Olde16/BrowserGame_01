@@ -55,5 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // - Schaden nehmen von Charakters (erst Angriff dann Vert)
     // - Siegerermittlung und Ehrung
     // Weitere Gestaltung nach erfüllung der oben genannten anforderungen
+    // Angriffsrichtung und Blockrichtung als Enum
 
 ?>

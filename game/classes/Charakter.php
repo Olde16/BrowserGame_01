@@ -82,9 +82,7 @@
         # Das bietet den Vorteil: Im Programmcode werden mit Aufruf der Funktionen automatisch die korrekten Verteidigungs bzw. Angriffswerte aus den eigenen Eigenschaften ermittelt.
         # So muss nicht wiederholt eine Berechnung gestartet und auf verschiedene Werte zugegriffen werden, sondern lediglich die dafür vorbereiteten Funktionen aufgerufen werden.
         # Das macht das Spiel dynamischer in Gestaltungsspielraum.
-        private function get_attk_effectiveness() : float {
-            
-        }
+
         private function get_block_effektivwert():float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
             global $global__game_deterministic;
             $unten = 0;
@@ -96,24 +94,40 @@
                 switch ($p) {
                     case 0:
                         $unten = 1;
+                        this->set_Angriffsrichtung("unten");
                         break;
                     case 1:
                         $mitte = 1;
+                        this->set_Angriffsrichtung("mitte");
                         break;
                     case 2:
                         $oben = 1;
+                        this->set_Angriffsrichtung("oben");
                         break;
                 }
             }
             else
             {
-                $unten = (rand(min: 0,max: 100)/100);
-                $oben = (rand(min: 0,max: 100- $unten)/100);
-                $mitte = (rand(min: 0,max: 100- $unten - $oben)/100);
+                $gewichtung = (rand(min: 0,max: 100)/100);
 
-                if ($unten < 0.3) { $unten = 0; }
-                if ($oben < 0.3) { $oben = 0; }
-                if ($mitte < 0.3) { $mitte = 0; }
+                switch ($p) {
+                    case 0:
+                        $unten = $gewichtung;
+                        this->set_Angriffsrichtung("unten");
+                        break;
+                    case 1:
+                        $mitte = $gewichtung;
+                        this->set_Angriffsrichtung("mitte");
+                        break;
+                    case 2:
+                        $oben = $gewichtung;
+                        this->set_Angriffsrichtung("oben");
+                        break;
+                }
+
+                if ($unten < 0.1) { $unten = 0; }
+                if ($oben < 0.1) { $oben = 0; }
+                if ($mitte < 0.1) { $mitte = 0; }
             }
             switch ($this->blockWahl) { // je nach auswahl des charakters richtigen Wert wahlen
                 case 'oben':
