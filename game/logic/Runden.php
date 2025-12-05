@@ -37,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     # Berechnung
     $schadA = $spieler->get_aschaden_aus_angriffswerte();
-    $schadV = $gegner->get_vschaden_aus_verteidigungswerte($schadA);
+    $angrRichtung = $spieler->get_Angriffsrichtung();
+    $schadV = $gegner->get_vschaden_aus_verteidigungswerte($schadA, $angrRichtung);
 
     $result["text"] = # Ergebnis in Textfeld
         "Du greifst mit <b>{$auswahl->get_bezeichnung()}</b> an und machst <b>$schadA</b> Schaden. " .

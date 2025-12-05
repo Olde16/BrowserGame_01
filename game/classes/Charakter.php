@@ -74,8 +74,8 @@
         public function get_aschaden_aus_angriffswerte(): int{ // ermittelt den von den Angriffswerten abhangigen abgegebenen Schaden
             return (int)(($this->Staerke * $this->Geschick * $this->Intelligenz) + $this->Waffenart->get_schaden()); // Waffenart als Eigenschaft des Angreifers
         }
-        public function get_vschaden_aus_verteidigungswerte(int $schaden_aus_angriffswert): int{ // ermittelt den von den Verteidigungswerten abhangigen verbleibenden Schaden, Schaden aus Angriff als Eigenschaft des Angreifers
-             return (int)($schaden_aus_angriffswert - (($schaden_aus_angriffswert * $this->get_block_effektivwert()) + $this->Intelligenz )); // Blockrichtung (effektivwert) als Eigenschaft des Angegriffenen
+        public function get_vschaden_aus_verteidigungswerte(int $schaden_aus_angriffswert, string $angrRichtung): int{ // ermittelt den von den Verteidigungswerten abhangigen verbleibenden Schaden, Schaden aus Angriff als Eigenschaft des Angreifers
+             return (int)($schaden_aus_angriffswert - (($schaden_aus_angriffswert * $this->get_block_effektivwert($angriffsrichtung)) + $this->Intelligenz )); // Blockrichtung (effektivwert) als Eigenschaft des Angegriffenen
         }
         # Charaktere koennen Gegner oder Spieler sein. Um die Implementierung des Angriff und Verteidigung so einfach wie moeglich zu gestalten wurde sich dafuer entschieden, 
         # die Angriff (get_aschaden_aus_angriffswerte) und Verteidigung Funktion (get_vschaden_aus_verteidigungswerten) in die Klasse Charakter mit einzubauen.
@@ -83,7 +83,7 @@
         # So muss nicht wiederholt eine Berechnung gestartet und auf verschiedene Werte zugegriffen werden, sondern lediglich die dafür vorbereiteten Funktionen aufgerufen werden.
         # Das macht das Spiel dynamischer in Gestaltungsspielraum.
 
-        private function get_block_effektivwert():float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
+        private function get_block_effektivwert(string $angr):float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
             global $global__game_deterministic;
             $unten = 0;
             $mitte = 0;
@@ -94,15 +94,12 @@
                 switch ($p) {
                     case 0:
                         $unten = 1;
-                        this->set_Angriffsrichtung("unten");
                         break;
                     case 1:
                         $mitte = 1;
-                        this->set_Angriffsrichtung("mitte");
                         break;
                     case 2:
                         $oben = 1;
-                        this->set_Angriffsrichtung("oben");
                         break;
                 }
             }
@@ -113,28 +110,28 @@
                 switch ($p) {
                     case 0:
                         $unten = $gewichtung;
-                        this->set_Angriffsrichtung("unten");
                         break;
                     case 1:
                         $mitte = $gewichtung;
-                        this->set_Angriffsrichtung("mitte");
                         break;
                     case 2:
                         $oben = $gewichtung;
-                        this->set_Angriffsrichtung("oben");
                         break;
                 }
 
-                if ($unten < 0.1) { $unten = 0; }
-                if ($oben < 0.1) { $oben = 0; }
-                if ($mitte < 0.1) { $mitte = 0; }
+                if ($unten <= 0.1) { $unten = 0; }
+                if ($oben <= 0.1) { $oben = 0; }
+                if ($mitte <= 0.1) { $mitte = 0; }
             }
             switch ($this->blockWahl) { // je nach auswahl des charakters richtigen Wert wahlen
                 case 'oben':
+                    if ($this->blockWahl !== $angr) return 1;
                     return $oben;
                 case 'unten':
+                    if ($this->blockWahl !== $angr) return 1;
                     return $unten;
                 case 'mitte':
+                    if ($this->blockWahl !== $angr) return 1;
                     return $mitte;
                 default:
                     return 0;
