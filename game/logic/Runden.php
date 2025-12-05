@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // TODO:
     // - Gegner/Spieler Balance
     // - Namen anzeigen lassen
-    // - Logik attr angriffsrichtung
+    //IA - Logik attr angriffsrichtung
     // - Implementierung der userspezifischen Blockrichtung
     // - HP Charakter und Gegner + Textausgabe
     // - Schaden nehmen von Charakters (erst Angriff dann Vert)

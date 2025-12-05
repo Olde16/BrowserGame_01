@@ -7,8 +7,8 @@
         private float $Geschick; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private float $Intelligenz; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private Waffenart $Waffenart; // Ausgerustete Waffe
-        private string $blockWahl;
-        private string $angriffsrichtung;
+        private string $blockWahl; // Richtung der Verteidigung
+        private string $angriffsrichtung; // Richtung des Angriffs
 
         public function get_Name(): string{
             return $this->Name;
@@ -69,7 +69,7 @@
             $this->blockWahl = $v_blockwahl;
         }
         public function __destruct(){
-
+            
         }
         public function get_aschaden_aus_angriffswerte(): int{ // ermittelt den von den Angriffswerten abhangigen abgegebenen Schaden
             return (int)(($this->Staerke * $this->Geschick * $this->Intelligenz) + $this->Waffenart->get_schaden()); // Waffenart als Eigenschaft des Angreifers
