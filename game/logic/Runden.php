@@ -46,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo json_encode($result);
 }
 
-
     // TODO:
     // - Gegner/Spieler Balance
     // - Namen anzeigen lassen
