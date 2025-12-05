@@ -10,7 +10,7 @@ require_once __DIR__ . '/../classes/Gegner.php';
 $result = [ # Ergebnis vorbereiten
     "error" => null,
     "text" => ""
-]; 
+];
 
 $global__game_deterministic = $_SESSION['cbAbsolutMode'] ?? false; # Deterministischer Modus?
 
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode($result);
         exit;
     }
-
+    
     # Spieler & Gegner erstellen
     $spieler = new Spieler("Spieler1", 10, 30, 0.5, 0.5);
     $spieler->set_Waffenart($auswahl);
@@ -45,5 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     echo json_encode($result);
 }
+
+
+    // TODO:
+    // - Gegner/Spieler Balance
+    // - Namen anzeigen lassen
+    // - Erklärung Umsetzung Angriff und Verteidigung Funktion in Klasse
+    // - Angriffsrichtung Attr für Ausgabe an GUI
+    // - Implementierung der userspezifischen Blockrichtung
+    // - HP Charakter und Gegner + Textausgabe
+    // - Schaden nehmen von Charakters (erst Angriff dann Vert)
+    // - Siegerermittlung und Ehrung
+    // Weitere Gestaltung nach erfüllung der oben genannten anforderungen
 
 ?>

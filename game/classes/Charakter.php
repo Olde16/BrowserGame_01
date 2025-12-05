@@ -51,14 +51,14 @@
         public function set_blockWahl(string $value): void{
             $this->blockWahl = $value;
         }
-        public function __construct(string $v_Name, int $v_Lebenspunkte,float $v_Staerke = 0, float $v_Geschick = 0, float $v_Intelligenz = 0){
+        public function __construct(string $v_Name, int $v_Lebenspunkte,float $v_Staerke = 0, float $v_Geschick = 0, float $v_Intelligenz = 0, Waffenart $v_Waffenart = Waffenart::FAUST, string $v_blockwahl = "oben"){
             $this->Name = $v_Name;
             $this->Lebenspunkte = $v_Lebenspunkte;
             $this->Staerke = $v_Staerke;
             $this->Geschick = $v_Geschick;
             $this->Intelligenz = $v_Intelligenz;
-            $this->Waffenart = Waffenart::FAUST;
-            $this->blockWahl = "oben";
+            $this->Waffenart = $v_Waffenart;
+            $this->blockWahl = $v_blockwahl;
         }
         public function __destruct(){
 
@@ -66,7 +66,7 @@
         public function get_aschaden_aus_angriffswerte(): int{ // ermittelt den von den Angriffswerten abhangigen abgegebenen Schaden
             return (int)(($this->Staerke * $this->Geschick * $this->Intelligenz) + $this->Waffenart->get_schaden()); // Waffenart als Eigenschaft des Angreifers
         }
-        public function get_vschaden_aus_verteidigungswerte(int $schaden_aus_angriffswert): int{ // ermittelt den von den Verteidigungswerten abhangigen verbleibenden Schaden
+        public function get_vschaden_aus_verteidigungswerte(int $schaden_aus_angriffswert): int{ // ermittelt den von den Verteidigungswerten abhangigen verbleibenden Schaden, Schaden aus Angriff als Eigenschaft des Angreifers
              return (int)($schaden_aus_angriffswert - (($schaden_aus_angriffswert * $this->get_block_effektivwert()) + $this->Intelligenz )); // Blockrichtung (effektivwert) als Eigenschaft des Angegriffenen
         }
         private function get_block_effektivwert():float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
@@ -96,7 +96,7 @@
                 $mitte = (rand(min: 0,max: 100- $unten - $oben)/100);
 
                 if ($unten < 0.3) { $unten = 0; }
-                if ($oben < 0.3) {$oben = 0; }
+                if ($oben < 0.3) { $oben = 0; }
                 if ($mitte < 0.3) { $mitte = 0; }
             }
             switch ($this->blockWahl) { // je nach auswahl des charakters richtigen Wert wahlen
