@@ -67,7 +67,8 @@ document.getElementById("roundForm").addEventListener("submit", async function(e
     document.getElementById("output").innerHTML = data.error || data.text;
 });
 
-document.getElementById("blockrichtung_input").addEventListener("input", function() {
+document.getElementById("blockrichtung_input").addEventListener("change", async function(e) {
+    e.preventDefault();
     const elist = document.getElementById("blockrichtung").options;
 
     for (let opt of elist) {
@@ -78,16 +79,18 @@ document.getElementById("blockrichtung_input").addEventListener("input", functio
     }
 });
 
-document.getElementById("angriffsrichtung_input").addEventListener("input", function() {
-    const elist = document.getElementById("blockrichtung").options;
+document.getElementById("angriffsrichtung_input").addEventListener("change", async function(e) {
+    e.preventDefault();
+    const elist = document.getElementById("Angriffsrichtung").options;
 
     for (let opt of elist) {
         if (opt.value === this.value) {
-            document.getElementById("blockrichtung_id").value = opt.id;
+            document.getElementById("angriffsrichtung_id").value = opt.id;
             break;
         }
     }
 });
+
 </script>
 
 </body>
