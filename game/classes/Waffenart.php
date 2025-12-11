@@ -24,9 +24,26 @@
                 Waffenart::MAGIE => "Magie",
             };
         }
+        public function get_ID(): string {
+            return match($this){
+                Waffenart::FAUST => 0,
+                Waffenart::DOLCH => 1,
+                Waffenart::SCHWERT => 2,
+                Waffenart::LASERSCHWERT => 3,
+                Waffenart::MAGIE => 4,
+            };
+        }
         public static function fromString(string $name): ?Waffenart {
             foreach (self::cases() as $w) {
                 if (strcasecmp(string1: $w->get_bezeichnung(), string2: $name) === 0) {
+                    return $w;
+                }
+            }
+        return null;
+        }
+        public static function fromID(int $id): ?Waffenart {
+            foreach (self::cases() as $w) {
+                if $w->get_ID() === 0 {
                     return $w;
                 }
             }
