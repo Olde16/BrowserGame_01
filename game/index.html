@@ -87,8 +87,15 @@ document.getElementById("roundForm").addEventListener("submit", async function(e
         body: formData
     });
 
-    let data = await response.json();
-    document.getElementById("output").innerHTML = data.error || data.text;
+    let text = await response.text(); // <-- raw response
+    console.log("Server response:", text);
+
+    try {
+        let data = JSON.parse(text);
+        document.getElementById("output").innerHTML = data.error || data.text;
+    } catch(e) {
+        document.getElementById("output").innerHTML = "Fehler: Ungültige Serverantwort.";
+    }
 });
 </script>
 

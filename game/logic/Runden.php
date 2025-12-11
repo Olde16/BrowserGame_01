@@ -57,12 +57,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $angrRichtung = $spieler->get_Angriffsrichtung();
     $schadV = $gegner->get_vschaden_aus_verteidigungswerte($schadA, $angrRichtung);
 
+    # DEBUG
+    ini_set('display_errors', 0);
+    error_reporting(E_ALL);
+    #
+
     $result["output"] = # Ergebnis in Textfeld
         "Du greifst mit <b>{$auswahl_waffe->get_bezeichnung()}</b> <b>{$auswahl_angriff->get_bezeichnung()}</b> an und machst <b>$schadA</b> Schaden. " .
         "Der Gegner blockt <b>{$gegner->get_blockWahl()->get_bezeichnung()}</b> und erleidet <b>$schadV</b> Schaden.";
-
     echo json_encode($result);
 }
+
+# DEBUG
+set_error_handler(function($severity, $message, $file, $line) use (&$result) {
+    $result["error"] = "PHP Error: $message in $file on line $line";
+    echo json_encode($result);
+    exit;
+});
+#
+set_exception_handler(function($e) use (&$result) {
+    $result["error"] = "PHP Exception: " . $e->getMessage();
+    echo json_encode($result);
+    exit;
+});
+#
 
     // TODO:
     // - Gegner/Spieler Balance
