@@ -27,7 +27,8 @@
     </datalist>
 
     <h3>Wähle deine Verteidigungsrichtung:</h3>
-    <input list="blockrichtung" name="blockrichtung">
+    <input list="blockrichtung" name="blockrichtung_input">
+    <input type="hidden" name="blockrichtung_id" id="blockrichtung_id">
 
     <datalist id="blockrichtung">
         <option id="0" value="Oben">
@@ -36,7 +37,8 @@
     </datalist>
 
     <h3>Wähle deine Angriffsrichtung:</h3>
-    <input list="angriff" name="angriffsrichtung">
+    <input list="angriff" name="angriffsrichtung_input">
+    <input type="hidden" name="angriffsrichtung_id" id="angriffsrichtung_id">
 
     <datalist id="angriff">
         <option id="0" value="Oben">
@@ -63,6 +65,28 @@ document.getElementById("roundForm").addEventListener("submit", async function(e
 
     let data = await response.json();
     document.getElementById("output").innerHTML = data.error || data.text;
+});
+
+document.getElementById("blockrichtung_input").addEventListener("input", function() {
+    const elist = document.getElementById("blockrichtung").options;
+
+    for (let opt of elist) {
+        if (opt.value === this.value) {
+            document.getElementById("blockrichtung_id").value = opt.id;
+            break;
+        }
+    }
+});
+
+document.getElementById("angriffsrichtung_input").addEventListener("input", function() {
+    const elist = document.getElementById("blockrichtung").options;
+
+    for (let opt of elist) {
+        if (opt.value === this.value) {
+            document.getElementById("blockrichtung_id").value = opt.id;
+            break;
+        }
+    }
 });
 </script>
 

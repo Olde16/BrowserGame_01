@@ -22,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $global__game_deterministic = $_SESSION['cbAbsolutMode'];
 
     $auswahl_waffe = Waffenart::fromString($_POST['waffe'] ?? ""); # Waffenauswahl
-    $auswahl_verteidigung = Blockrichtung::fromID($_POST['blockrichtung.id'] ?? -1); # Verteidigungs Wahl
-    $auswahl_angriff = Angriffsrichtung::fromID($_POST['angriffsrichtung.id'] ?? -1); # Angriffs Wahl
+    $auswahl_verteidigung = Blockrichtung::fromID($_POST['blockrichtung_id'] ?? -1); # Verteidigungs Wahl
+    $auswahl_angriff = Angriffsrichtung::fromID($_POST['angriffsrichtung_id'] ?? -1); # Angriffs Wahl
 
     if ($auswahl_waffe == "") { # Fehler in Fehlerfeld
         $result["error"] = "Bitte eine gültige Waffe auswählen.";
@@ -50,14 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gegner = new Gegner("Dundun", 10, 30, 0.5, 0.5);
     $gegner->set_Waffenart(Waffenart::FAUST);
     $gegner->set_blockWahl(Blockrichtung::OBEN);
-    $gegner->set_Angriffsrichtung(Angriffsrichtung::UNTEN)
+    $gegner->set_Angriffsrichtung(Angriffsrichtung::UNTEN);
 
     # Berechnung
     $schadA = $spieler->get_aschaden_aus_angriffswerte();
     $angrRichtung = $spieler->get_Angriffsrichtung();
     $schadV = $gegner->get_vschaden_aus_verteidigungswerte($schadA, $angrRichtung);
 
-    $result["text"] = # Ergebnis in Textfeld
+    $result["output"] = # Ergebnis in Textfeld
         "Du greifst mit <b>{$auswahl_waffe->get_bezeichnung()}</b> <b>{$auswahl_angriff->get_bezeichnung()}</b> an und machst <b>$schadA</b> Schaden. " .
         "Der Gegner blockt <b>{$gegner->get_blockWahl()->get_bezeichnung()}</b> und erleidet <b>$schadV</b> Schaden.";
 
