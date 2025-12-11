@@ -44,12 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     # Spieler & Gegner erstellen
     $spieler = new Spieler("Spieler1", 10, 30, 0.5, 0.5);
     $spieler->set_Waffenart($auswahl_waffe);
-    $spieler->set_blockWahl($auswahl_verteidigung);
+    $spieler->set_Blockrichtung($auswahl_verteidigung);
     $spieler->set_Angriffsrichtung($auswahl_angriff);
 
     $gegner = new Gegner("Dundun", 10, 30, 0.5, 0.5);
     $gegner->set_Waffenart(Waffenart::FAUST);
-    $gegner->set_blockWahl(Blockrichtung::OBEN);
+    $gegner->set_Blockrichtung(Blockrichtung::OBEN);
     $gegner->set_Angriffsrichtung(Angriffsrichtung::UNTEN);
 
     # Berechnung
@@ -57,9 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $angrRichtung = $spieler->get_Angriffsrichtung();
     $schadV = $gegner->get_vschaden_aus_verteidigungswerte($schadA, $angrRichtung);
 
-    $result["output"] = # Ergebnis in Textfeld
-        "Du greifst mit <b>{$auswahl_waffe->get_bezeichnung()}</b> <b>{$auswahl_angriff->get_bezeichnung()}</b> an und machst <b>{$schadA}</b> Schaden. " .
-        "Der Gegner blockt <b>{$gegner->get_blockWahl()->get_bezeichnung()}</b> und erleidet <b>{$schadV}</b> Schaden.";
+    $result["text"] = # Ergebnis in Textfeld
+        "Du greifst mit <b>{$auswahl_waffe->get_DisplayName()}</b> <b>{$auswahl_angriff->get_DisplayName()}</b> an und machst <b>{$schadA}</b> Schaden. " .
+        "Der Gegner blockt <b>{$gegner->get_Blockrichtung()->get_DisplayName()}</b> und erleidet <b>{$schadV}</b> Schaden.";
     echo json_encode($result);
 }
 

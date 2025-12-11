@@ -7,7 +7,7 @@
         private float $Geschick; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private float $Intelligenz; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private Waffenart $Waffenart; // Ausgerustete Waffe
-        private Blockrichtung $blockWahl; // Richtung der Verteidigung
+        private Blockrichtung $Blockrichtung; // Richtung der Verteidigung
         private Angriffsrichtung $angriffsrichtung; // Richtung des Angriffs
 
         public function get_Name(): string{
@@ -46,10 +46,10 @@
         public function set_Waffenart(Waffenart $value): void{
             $this->Waffenart = $value;
         }
-        public function get_blockWahl(): Blockrichtung{
+        public function get_Blockrichtung(): Blockrichtung{
             return $this->blockWahl;
         }
-        public function set_blockWahl(Blockrichtung $value): void{
+        public function set_Blockrichtung(Blockrichtung $value): void{
             $this->blockWahl = $value;
         }
         public function get_Angriffsrichtung() : Angriffsrichtung {

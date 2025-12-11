@@ -15,7 +15,7 @@
                 Waffenart::MAGIE => 600,
             };
         }
-        public function get_bezeichnung(): string {
+        public function get_DisplayName(): string {
             return match($this){
                 Waffenart::FAUST => "Faust",
                 Waffenart::DOLCH => "Dolch",
@@ -35,7 +35,7 @@
         }
         public static function fromString(string $name): ?Waffenart {
             foreach (self::cases() as $w) {
-                if (strcasecmp(string1: $w->get_bezeichnung(), string2: $name) === 0) {
+                if (strcasecmp(string1: $w->get_DisplayName(), string2: $name) === 0) {
                     return $w;
                 }
             }
