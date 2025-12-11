@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <title>Spiel</title>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Spiel</title>
+</head>
 <body>
 
 <h3>Spiel Einstellungen:</h3>
@@ -16,19 +15,20 @@
     </label>
 
     <h3>Wähle deine Waffe:</h3>
-    <input list="waffen" name="waffe">
+    <input list="waffen" id="waffe_input">
+    <input type="hidden" name="waffe_id" id="waffe_id">
 
     <datalist id="waffen">
-        <option value="Faust">
-        <option value="Dolch">
-        <option value="Schwert">
-        <option value="Laserschwert">
-        <option value="Magie">
+        <option id="0" value="Faust">
+        <option id="1" value="Dolch">
+        <option id="2" value="Schwert">
+        <option id="3" value="Laserschwert">
+        <option id="4" value="Magie">
     </datalist>
 
     <h3>Wähle deine Verteidigungsrichtung:</h3>
-    <input list="blockrichtung" name="blockrichtung_input">
-    <input type="hidden" name="blockrichtung_id" id="blockrichtung_id">
+    <input list="blockrichtung" id="block_input">
+    <input type="hidden" name="block_id" id="block_id">
 
     <datalist id="blockrichtung">
         <option id="0" value="Oben">
@@ -37,8 +37,8 @@
     </datalist>
 
     <h3>Wähle deine Angriffsrichtung:</h3>
-    <input list="angriff" name="angriffsrichtung_input">
-    <input type="hidden" name="angriffsrichtung_id" id="angriffsrichtung_id">
+    <input list="angriff" id="angriff_input">
+    <input type="hidden" name="angriff_id" id="angriff_id">
 
     <datalist id="angriff">
         <option id="0" value="Oben">
@@ -53,6 +53,30 @@
 <p id="output"></p>
 
 <script>
+function attachIdResolver(inputId, listId, hiddenId) {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId).options;
+    const hidden = document.getElementById(hiddenId);
+
+    input.addEventListener("input", function () {
+        hidden.value = ""; // reset
+
+        for (let opt of list) {
+            if (opt.value === input.value) {
+                hidden.value = opt.id;
+                break;
+            }
+        }
+    });
+}
+
+attachIdResolver("waffe_input", "waffen", "waffe_id");
+
+attachIdResolver("block_input", "blockrichtung", "block_id");
+
+attachIdResolver("angriff_input", "angriff", "angriff_id");
+
+
 document.getElementById("roundForm").addEventListener("submit", async function(e){
     e.preventDefault();
 
@@ -66,33 +90,7 @@ document.getElementById("roundForm").addEventListener("submit", async function(e
     let data = await response.json();
     document.getElementById("output").innerHTML = data.error || data.text;
 });
-
-document.getElementById("blockrichtung_input").addEventListener("change", async function(e) {
-    e.preventDefault();
-    const elist = document.getElementById("blockrichtung").options;
-
-    for (let opt of elist) {
-        if (opt.value === this.value) {
-            document.getElementById("blockrichtung_id").value = opt.id;
-            break;
-        }
-    }
-});
-
-document.getElementById("angriffsrichtung_input").addEventListener("change", async function(e) {
-    e.preventDefault();
-    const elist = document.getElementById("Angriffsrichtung").options;
-
-    for (let opt of elist) {
-        if (opt.value === this.value) {
-            document.getElementById("angriffsrichtung_id").value = opt.id;
-            break;
-        }
-    }
-});
-
 </script>
 
 </body>
-
 </html>
