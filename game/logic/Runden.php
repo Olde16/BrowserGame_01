@@ -10,7 +10,7 @@ require_once __DIR__ . '/../classes/Spieler.php';
 require_once __DIR__ . '/../classes/Gegner.php';
 
 $result = [ # Ergebnis vorbereiten
-    "error" => null,
+    "error" => "",
     "text" => ""
 ];
 
@@ -21,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['cbAbsolutMode'] = isset($_POST['cbAbsolutMode']);
     $global__game_deterministic = $_SESSION['cbAbsolutMode'];
 
-    $auswahl_waffe = Waffenart::fromID($_POST['waffe_id']   ?? -1);
-    $auswahl_verteidigung = Blockrichtung::fromID($_POST['block_id'] ?? -1);
-    $auswahl_angriff = Angriffsrichtung::fromID($_POST['angriff_id'] ?? -1);
+    $auswahl_waffe = Waffenart::fromString($_POST['waffe'] ?? "");
+    $auswahl_verteidigung = Blockrichtung::fromString( $_POST['block'] ?? "");
+    $auswahl_angriff = Angriffsrichtung::fromString( $_POST['angriff'] ?? "");
 
     if (!$auswahl_waffe) {
         $result["error"] = "Bitte eine gültige Waffe auswählen.";
@@ -63,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     #
 
     $result["output"] = # Ergebnis in Textfeld
-        "Du greifst mit <b>{$auswahl_waffe->get_bezeichnung()}</b> <b>{$auswahl_angriff->get_bezeichnung()}</b> an und machst <b>$schadA</b> Schaden. " .
-        "Der Gegner blockt <b>{$gegner->get_blockWahl()->get_bezeichnung()}</b> und erleidet <b>$schadV</b> Schaden.";
+        "Du greifst mit <b>{$auswahl_waffe->get_bezeichnung()}</b> <b>{$auswahl_angriff->get_bezeichnung()}</b> an und machst <b>{$schadA}</b> Schaden. " .
+        "Der Gegner blockt <b>{$gegner->get_blockWahl()->get_bezeichnung()}</b> und erleidet <b>{$schadV}</b> Schaden.";
     echo json_encode($result);
 }
 

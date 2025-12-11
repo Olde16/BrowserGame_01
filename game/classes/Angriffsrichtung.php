@@ -8,7 +8,7 @@
             return match($this){
                 Angriffsrichtung::OBEN => "Oben",
                 Angriffsrichtung::UNTEN => "Unten",
-                Angriffsrichtung::MITTE => "in der Mitte",
+                Angriffsrichtung::MITTE => "Mitte",
             };
         }
         public function get_ID(): int {

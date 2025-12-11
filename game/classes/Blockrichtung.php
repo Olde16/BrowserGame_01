@@ -8,7 +8,7 @@
             return match($this){
                 Blockrichtung::OBEN => "Oben",
                 Blockrichtung::UNTEN => "Unten",
-                Blockrichtung::MITTE => "in der Mitte",
+                Blockrichtung::MITTE => "Mitte",
             };
         }
         public function get_ID(): int {
