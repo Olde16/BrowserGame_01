@@ -21,21 +21,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['cbAbsolutMode'] = isset($_POST['cbAbsolutMode']);
     $global__game_deterministic = $_SESSION['cbAbsolutMode'];
 
-    $auswahl_waffe       = Waffenart::fromID($_POST['waffe_id']   ?? -1);
+    $auswahl_waffe = Waffenart::fromID($_POST['waffe_id']   ?? -1);
     $auswahl_verteidigung = Blockrichtung::fromID($_POST['block_id'] ?? -1);
-    $auswahl_angriff     = Angriffsrichtung::fromID($_POST['angriff_id'] ?? -1);
+    $auswahl_angriff = Angriffsrichtung::fromID($_POST['angriff_id'] ?? -1);
 
-    if ($auswahl_waffe === null) {
+    if (!$auswahl_waffe) {
         $result["error"] = "Bitte eine gültige Waffe auswählen.";
-        echo json_encode($result); exit;
+        echo json_encode($result);
+        exit;
     }
-    if ($auswahl_verteidigung === null) {
+    if (!$auswahl_verteidigung) {
         $result["error"] = "Bitte eine gültige Verteidigungsrichtung auswählen.";
-        echo json_encode($result); exit;
+        echo json_encode($result);
+        exit;
     }
-    if ($auswahl_angriff === null) {
+    if (!$auswahl_angriff) {
         $result["error"] = "Bitte eine gültige Angriffsrichtung auswählen.";
-        echo json_encode($result); exit;
+        echo json_encode($result);
+        exit;
     }
 
     # Spieler & Gegner erstellen
