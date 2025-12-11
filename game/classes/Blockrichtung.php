@@ -29,7 +29,7 @@
 
         public static function fromID(int $id): ?Blockrichtung {
             foreach (self::cases() as $w) {
-                if $w->get_ID() === 0 {
+                if $w->get_ID() === $id {
                     return $w;
                 }
             }
