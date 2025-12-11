@@ -78,9 +78,10 @@ set_exception_handler(function($e) use (&$result) {
 #
 
     // TODO:
+    // Fix code (500 Server Error)
+
     // - Gegner/Spieler Balance
     // - Namen anzeigen lassen
-    // - Implementierung der userspezifischen Blockrichtung in UI
     // - HP Charakter und Gegner + Textausgabe
     // - Schaden nehmen von Charakters (erst Angriff dann Vert)
     // - Siegerermittlung und Ehrung
