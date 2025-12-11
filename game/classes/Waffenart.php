@@ -5,6 +5,7 @@
         case FAUST;
         case LASERSCHWERT;
         case MAGIE;
+        
         public function get_schaden(): int {
             return match($this){
                 Waffenart::FAUST => 4,

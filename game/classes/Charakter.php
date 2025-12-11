@@ -7,8 +7,8 @@
         private float $Geschick; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private float $Intelligenz; // 0.5 min bis x -> rand(bereich y bis x) unterer y und oberer x Bereich skill bar
         private Waffenart $Waffenart; // Ausgerustete Waffe
-        private string $blockWahl; // Richtung der Verteidigung
-        private string $angriffsrichtung; // Richtung des Angriffs
+        private Blockrichtung $blockWahl; // Richtung der Verteidigung
+        private Angriffsrichtung $angriffsrichtung; // Richtung des Angriffs
 
         public function get_Name(): string{
             return $this->Name;
@@ -46,20 +46,20 @@
         public function set_Waffenart(Waffenart $value): void{
             $this->Waffenart = $value;
         }
-        public function get_blockWahl(): string{
+        public function get_blockWahl(): Blockrichtung{
             return $this->blockWahl;
         }
-        public function set_blockWahl(string $value): void{
+        public function set_blockWahl(Blockrichtung $value): void{
             $this->blockWahl = $value;
         }
-        public function get_Angriffsrichtung() : string {
+        public function get_Angriffsrichtung() : Angriffsrichtung {
             return $this->angriffsrichtung;
         }
-        public function set_Angriffsrichtung(string $value) : void {
+        public function set_Angriffsrichtung(Angriffsrichtung $value) : void {
             $this->angriffsrichtung = $value;
         }
 
-        public function __construct(string $v_Name, int $v_Lebenspunkte,float $v_Staerke = 0, float $v_Geschick = 0, float $v_Intelligenz = 0, Waffenart $v_Waffenart = Waffenart::FAUST, string $v_blockwahl = "oben"){
+        public function __construct(string $v_Name, int $v_Lebenspunkte,float $v_Staerke = 0, float $v_Geschick = 0, float $v_Intelligenz = 0, Waffenart $v_Waffenart = Waffenart::FAUST, Blockrichtung $v_blockwahl = Blockrichtung::UNTEN, Angriffsrichtung $v_angriffsrichtung = Angriffsrichtung::UNTEN){
             $this->Name = $v_Name;
             $this->Lebenspunkte = $v_Lebenspunkte;
             $this->Staerke = $v_Staerke;
@@ -67,6 +67,7 @@
             $this->Intelligenz = $v_Intelligenz;
             $this->Waffenart = $v_Waffenart;
             $this->blockWahl = $v_blockwahl;
+            $this->angriffsrichtung = $v_angriffsrichtung;
         }
         public function __destruct(){
             
@@ -81,13 +82,13 @@
         # die Angriff (get_aschaden_aus_angriffswerte) und Verteidigung Funktion (get_vschaden_aus_verteidigungswerten) in die Klasse Charakter mit einzubauen.
         # Das bietet den Vorteil: Im Programmcode werden mit Aufruf der Funktionen automatisch die korrekten Verteidigungs bzw. Angriffswerte aus den eigenen Eigenschaften ermittelt.
         # So muss nicht wiederholt eine Berechnung gestartet und auf verschiedene Werte zugegriffen werden, sondern lediglich die dafür vorbereiteten Funktionen aufgerufen werden.
-        # Das macht das Spiel dynamischer in Gestaltungsspielraum.
+        # Das macht das Spiel dynamischer im Gestaltungsspielraum und nutzt die Klasseneigenschaften maximal aus. Die einzelnen Werte werden so nicht verstreut in einer globalen Variable gespeichert, sondern im Objekt selbst.
 
-        private function get_block_effektivwert(string $angr):float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
-            global $global__game_deterministic;
-            $unten = 0;
-            $mitte = 0;
-            $oben = 0;
+        private function get_block_effektivwert(Angriffsrichtung $angr):float{ // ermittelt den Effektivwert der Blockrichtung in Abhangigkeit von Angriffsrichtung des Gegners welche (prozentual) mit rand ermittelt wird
+            global $global__game_deterministic; // Variable fuer die "extra" Herausforderung
+            float $unten = 0;
+            float $mitte = 0;
+            float $oben = 0;
 
             if($global__game_deterministic){  // ist das Spiel vom Spieler deterministisch eingestellt, wird mit absoluten Werten statt mit Prozenten gearbeitet (schwerer)
                 $p = rand(min: 0,max: 2);
@@ -105,8 +106,8 @@
             }
             else
             {
+                $p = rand(min: 0,max: 2);
                 $gewichtung = (rand(min: 0,max: 100)/100);
-
                 switch ($p) {
                     case 0:
                         $unten = $gewichtung;
@@ -123,15 +124,15 @@
                 if ($oben <= 0.1) { $oben = 0; }
                 if ($mitte <= 0.1) { $mitte = 0; }
             }
-            switch ($this->blockWahl) { // je nach auswahl des charakters richtigen Wert wahlen
-                case 'oben':
-                    if ($this->blockWahl !== $angr) return 1;
+            switch ($this->blockWahl->get_ID()) { // je nach auswahl des charakters richtigen Wert wahlen
+                case 0:
+                    if (0 !== $angr->get_ID()) return 1; // wurde von der geblockten richtung angegriffen ist der Blockwert 1 = 100% andernfalls prozentual oder wie oben absolut (0)
                     return $oben;
-                case 'unten':
-                    if ($this->blockWahl !== $angr) return 1;
+                case 1:
+                    if (1 !== $angr->get_ID()) return 1;
                     return $unten;
-                case 'mitte':
-                    if ($this->blockWahl !== $angr) return 1;
+                case 2:
+                    if (2 !== $angr->get_ID()) return 1;
                     return $mitte;
                 default:
                     return 0;
