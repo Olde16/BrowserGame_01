@@ -18,7 +18,7 @@ $global__game_deterministic = $_SESSION['cbAbsolutMode'] ?? false; # Determinist
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $_SESSION['cbAbsolutMode'] = isset($_POST['cbAbsolutMode']);
+    $_SESSION['cbAbsolutMode'] = isset($_POST['cbAbsolutMode'] ?? false);
     $global__game_deterministic = $_SESSION['cbAbsolutMode'];
 
     $auswahl_waffe = Waffenart::fromString($_POST['waffe'] ?? "");
