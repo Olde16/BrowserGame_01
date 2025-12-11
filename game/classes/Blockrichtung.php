@@ -26,5 +26,14 @@
             }
         return null;
         }
+
+        public static function fromID(int $id): ?Blockrichtung {
+            foreach (self::cases() as $w) {
+                if $w->get_ID() === 0 {
+                    return $w;
+                }
+            }
+        return null;
+        }
     }
 ?>

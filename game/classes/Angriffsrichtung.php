@@ -26,5 +26,13 @@
             }
         return null;
         }
+        public static function fromID(int $id): ?Angriffsrichtung {
+            foreach (self::cases() as $w) {
+                if $w->get_ID() === 0 {
+                    return $w;
+                }
+            }
+        return null;
+        }
     }
 ?>
