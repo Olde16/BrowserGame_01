@@ -2,74 +2,141 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Spiel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kampf-Arena</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h3>Spiel Einstellungen:</h3>
+<h1>🎒 Strategie-Kampf</h1>
 
 <form id="roundForm">
-    <label>
+    <label class="checkbox-label">
         <input type="checkbox" name="cbAbsolutMode">
-        Deterministischer Modus
+        <span>Deterministischer Modus (Kein Zufall)</span>
     </label>
 
-    <h3>Wähle deine Waffe:</h3>
-    <input list="waffen" id="waffe">
+    <label for="waffe">Waffe wählen (Achte auf Munition!):</label>
+    <select name="waffe" id="waffe" required>
+        <option value="Faust" data-id="0">👊 Faust (Unendlich)</option>
+        <option value="Dolch" data-id="1">🗡️ Dolch (Unendlich)</option>
+        <option value="Schwert" data-id="2">⚔️ Schwert (5x)</option>
+        <option value="Laserschwert" data-id="3">✨ Laserschwert (2x)</option>
+        <option value="Magie" data-id="4">🔥 Magie (1x - ULT!)</option>
+    </select>
 
-    <datalist id="waffen">
-        <option id="0" value="Faust">
-        <option id="1" value="Dolch">
-        <option id="2" value="Schwert">
-        <option id="3" value="Laserschwert">
-        <option id="4" value="Magie">
-    </datalist>
+    <div style="display:flex; gap:10px;">
+        <div style="flex:1">
+            <label for="block">Verteidigung:</label>
+            <select name="block" id="block" required>
+                <option value="Oben">⬆️ Oben</option>
+                <option value="Mitte">➡️ Mitte</option>
+                <option value="Unten">⬇️ Unten</option>
+            </select>
+        </div>
+        <div style="flex:1">
+            <label for="angriff">Angriff:</label>
+            <select name="angriff" id="angriff" required>
+                <option value="Oben">⬆️ Oben</option>
+                <option value="Mitte">➡️ Mitte</option>
+                <option value="Unten">⬇️ Unten</option>
+            </select>
+        </div>
+    </div>
 
-    <h3>Wähle deine Verteidigungsrichtung:</h3>
-    <input list="blockrichtung" id="block">
-
-    <datalist id="blockrichtung">
-        <option id="0" value="Oben">
-        <option id="1" value="Unten">
-        <option id="2" value="Mitte">
-    </datalist>
-
-    <h3>Wähle deine Angriffsrichtung:</h3>
-    <input list="angriffrichtung" id="angriff">
-
-    <datalist id="angriffrichtung">
-        <option id="0" value="Oben">
-        <option id="1" value="Unten">
-        <option id="2" value="Mitte">
-    </datalist>
-
-    <br><br>
-    <button type="submit">Runde starten</button>
+    <button type="submit">Runde starten ⚔️</button>
 </form>
 
-<p id="output"></p>
+<div class="status-box">
+    <div style="flex: 1;">
+        <strong>🦸 Held</strong>
+        <div class="health-bar-container">
+            <div id="bar-player" class="health-bar-fill hp-green" style="width: 100%;">Wait...</div>
+        </div>
+        <span id="text-player">Bereit...</span>
+    </div>
+    <div style="flex: 1; text-align: right;">
+        <strong id="name-enemy">👾 Gegner</strong>
+        <div class="health-bar-container">
+            <div id="bar-enemy" class="health-bar-fill hp-red" style="width: 100%;">Wait...</div>
+        </div>
+        <span id="text-enemy">Bereit...</span>
+    </div>
+</div>
+
+<div id="output"><i>Drücke Start um die Arena zu betreten...</i></div>
 
 <script>
+const weaponNames = {
+    0: "👊 Faust", 1: "🗡️ Dolch", 2: "⚔️ Schwert", 3: "✨ Laser", 4: "🔥 Magie"
+};
+
 document.getElementById("roundForm").addEventListener("submit", async function(e){
     e.preventDefault();
-
-    const formData = new FormData(this);
-
-    let response = await fetch("logic/Runden.php", {
-        method: "POST",
-        body: formData
-    });
-
-    let text = await response.text(); // <-- raw (DEBUG)
-    console.log("Server response:", text);
-
+    const outputDiv = document.getElementById("output");
+    const barPlayer = document.getElementById("bar-player");
+    const barEnemy = document.getElementById("bar-enemy");
+    const textPlayer = document.getElementById("text-player");
+    const textEnemy = document.getElementById("text-enemy");
+    const nameEnemy = document.getElementById("name-enemy");
+    
     try {
+        let response = await fetch("logic/Runden.php", { method: "POST", body: new FormData(this) });
+        let text = await response.text(); 
         let data = JSON.parse(text);
-        document.getElementById("output").innerHTML = data.error || data.text;
+            
+        if (data.error) {
+            outputDiv.innerHTML = `<span class="error">⚠️ ${data.error}</span>`;
+        } else {
+            outputDiv.innerHTML = data.text;
+            
+            if (data.inventory) updateWeaponSelect(data.inventory);
+            if (data.finished) setTimeout(() => location.reload(), 3000);
+
+            // HP Balken Update
+            if (data.status) {
+                let pPct = (data.status.p_hp / data.status.p_max) * 100;
+                barPlayer.style.width = Math.max(0, pPct) + "%";
+                barPlayer.innerText = data.status.p_hp + " HP";
+                textPlayer.innerText = `${data.status.p_hp} / ${data.status.p_max} HP`;
+
+                let ePct = (data.status.e_hp / data.status.e_max) * 100;
+                barEnemy.style.width = Math.max(0, ePct) + "%";
+                barEnemy.innerText = data.status.e_hp + " HP";
+                textEnemy.innerText = `${data.status.e_hp} / ${data.status.e_max} HP`;
+                
+                nameEnemy.innerText = "👾 " + data.status.e_name;
+            }
+        }
     } catch(e) {
-        document.getElementById("output").innerHTML = "Fehler: Ungültige Serverantwort.";
+        outputDiv.innerHTML = `<span class="error">Netzwerkfehler: ${e}</span>`;
     }
 });
+
+function updateWeaponSelect(inventory) {
+    const select = document.getElementById('waffe');
+    const options = select.options;
+    for (let i = 0; i < options.length; i++) {
+        const opt = options[i];
+        const id = opt.getAttribute('data-id');
+        if (inventory[id] !== undefined) {
+            let count = inventory[id];
+            if (count > 1000) {
+                opt.text = `${weaponNames[id]} (∞)`;
+                opt.disabled = false;
+            } else {
+                opt.text = `${weaponNames[id]} (${count}x)`;
+                if (count <= 0) {
+                    opt.disabled = true;
+                    opt.text += " - LEER";
+                    if (select.value === opt.value) select.value = "Faust";
+                } else {
+                    opt.disabled = false;
+                }
+            }
+        }
+    }
+}
 </script>
 
 </body>
