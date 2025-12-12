@@ -1,10 +1,11 @@
 <?php
 
-    class Gegner extends Charakter{
-        private string $Klasse = "Gegner";
-        public function get_Klasse():string {
-            return $this->Klasse;
-        }
-    }
+require_once __DIR__ . '/Charakter.php';
 
-?>
+class Gegner extends Charakter {
+    private string $klasse = "Gegner";
+
+    public function getKlasse(): string {
+        return $this->klasse;
+    }
+}
