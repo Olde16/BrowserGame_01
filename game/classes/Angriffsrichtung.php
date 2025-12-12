@@ -1,38 +1,43 @@
 <?php
-    enum Angriffsrichtung {
-        case OBEN;
-        case UNTEN;
-        case MITTE;
-        
-        public function get_DisplayName(): string {
-            return match($this){
-                Angriffsrichtung::OBEN => "Oben",
-                Angriffsrichtung::UNTEN => "Unten",
-                Angriffsrichtung::MITTE => "Mitte",
-            };
-        }
-        public function get_ID(): int {
-            return match($this){
-                Angriffsrichtung::OBEN => 0,
-                Angriffsrichtung::UNTEN => 1,
-                Angriffsrichtung::MITTE => 2,
-            };
-        }
-        public static function fromString(string $name): ?Angriffsrichtung {
-            foreach (self::cases() as $w) {
-                if (strcasecmp(string1: $w->get_DisplayName(), string2: $name) === 0) {
-                    return $w;
-                }
-            }
-        return null;
-        }
-        public static function fromID(int $id): ?Angriffsrichtung {
-            foreach (self::cases() as $w) {
-                if $w->get_ID() === $id {
-                    return $w;
-                }
-            }
-        return null;
-        }
+
+enum Angriffsrichtung {
+    case OBEN;
+    case UNTEN;
+    case MITTE;
+
+    public function get_DisplayName(): string {
+        return match($this) {
+            self::OBEN => "Oben",
+            self::UNTEN => "Unten",
+            self::MITTE => "Mitte",
+        };
     }
-?>
+
+    public function get_ID(): int {
+        return match($this) {
+            self::OBEN => 0,
+            self::UNTEN => 1,
+            self::MITTE => 2,
+        };
+    }
+
+    public static function fromString(string $name): ?self {
+        $name = trim($name); // Leerzeichen entfernen
+        foreach (self::cases() as $w) {
+            // Vergleicht "Oben" (Display) ODER "OBEN" (Name) case-insensitive
+            if (strcasecmp($w->get_DisplayName(), $name) === 0 || strcasecmp($w->name, $name) === 0) {
+                return $w;
+            }
+        }
+        return null;
+    }
+
+    public static function fromID(int $id): ?self {
+        foreach (self::cases() as $w) {
+            if ($w->get_ID() === $id) {
+                return $w;
+            }
+        }
+        return null;
+    }
+}
