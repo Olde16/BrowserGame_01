@@ -6,18 +6,19 @@ enum Waffenart {
     case FAUST;
     case LASERSCHWERT;
     case MAGIE;
+    // Ohne Waffen kein Game
 
     public function get_schaden(): int {
         return match($this) {
-            self::FAUST => 3,           // Kleiner Buff (war 2)
-            self::DOLCH => 7,           // Kleiner Buff (war 5)
-            self::SCHWERT => 15,        // Solider Schaden (war 10)
-            self::LASERSCHWERT => 35,   // Stark! (war 18)
-            self::MAGIE => 120,         // BOOM! Echte Ulti (war 25)
+            self::FAUST => 3,           // Digga muss das...
+            self::DOLCH => 7,           // Irgendwo findet sich immer ein Messer...
+            self::SCHWERT => 15,        // Solid.
+            self::LASERSCHWERT => 35,   // Joda sein ich bin nicht... Kaffee ich brauchen.
+            self::MAGIE => 120,         // Nanu wo kam das her...
         };
     }
-
-    // ... (Der Rest der Datei bleibt gleich wie vorher) ...
+    // Wir entschuldigen uns fuer den cringen Humor unseres Kommentators...
+    // Hier werden - wenn auch geschmacklos kommentiert - die Schadenswerte für die Waffen festgelegt
     
     public function get_DisplayName(): string {
         return match($this) {
@@ -28,6 +29,7 @@ enum Waffenart {
             self::MAGIE => "Magie",
         };
     }
+    // Zur einheitlichen Ausgabe an Spieler
 
     public function get_ID(): int {
         return match($this) {
@@ -38,6 +40,7 @@ enum Waffenart {
             self::MAGIE => 4,
         };
     }
+    // Zur programm-internen Verarbeitung als IDs
 
     public static function fromString(string $name): ?self {
         $name = trim($name);
@@ -48,6 +51,7 @@ enum Waffenart {
         }
         return null;
     }
+    // ENUM erkennung mittels String Darstellung oder Enum Eigenschaft
 
     public static function fromID(int $id): ?self {
         foreach (self::cases() as $w) {
@@ -57,5 +61,6 @@ enum Waffenart {
         }
         return null;
     }
+    // ENUM erkennung mittels interner ID
 }
 ?>

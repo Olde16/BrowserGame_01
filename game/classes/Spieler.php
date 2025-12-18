@@ -9,3 +9,4 @@ class Spieler extends Charakter {
         return $this->klasse;
     }
 }
+// Gegner erbt Charakter und bietet weitere Ausbaumöglichkeiten

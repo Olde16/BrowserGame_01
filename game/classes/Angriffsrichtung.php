@@ -4,6 +4,7 @@ enum Angriffsrichtung {
     case OBEN;
     case UNTEN;
     case MITTE;
+    // Drei Angriffsrichtungen
 
     public function get_DisplayName(): string {
         return match($this) {
@@ -12,6 +13,7 @@ enum Angriffsrichtung {
             self::MITTE => "Mitte",
         };
     }
+    // Zur einheitlichen Ausgabe an Spieler
 
     public function get_ID(): int {
         return match($this) {
@@ -20,17 +22,19 @@ enum Angriffsrichtung {
             self::MITTE => 2,
         };
     }
+    // Zur programm-internen Verarbeitung als IDs
 
     public static function fromString(string $name): ?self {
         $name = trim($name); // Leerzeichen entfernen
         foreach (self::cases() as $w) {
-            // Vergleicht "Oben" (Display) ODER "OBEN" (Name) case-insensitive
+            // Vergleicht "Oben" (für Anzeige) ODER "OBEN" (Name) case-insensitive
             if (strcasecmp($w->get_DisplayName(), $name) === 0 || strcasecmp($w->name, $name) === 0) {
                 return $w;
             }
         }
         return null;
     }
+    // ENUM erkennung mittels String Darstellung oder Enum Eigenschaft
 
     public static function fromID(int $id): ?self {
         foreach (self::cases() as $w) {
@@ -40,4 +44,5 @@ enum Angriffsrichtung {
         }
         return null;
     }
+    // ENUM erkennung mittels interner ID
 }

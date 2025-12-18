@@ -1,3 +1,5 @@
+/* Bisschen langweiliges Farben krams... */
+
 body { 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     padding: 20px; 
@@ -77,7 +79,7 @@ option:disabled {
     color: #ccc; 
 }
 
-/* --- Status Box & Lebensbalken --- */
+/* Status Box & Lebensbalken */
 .status-box { 
     display: flex; 
     justify-content: space-between; 

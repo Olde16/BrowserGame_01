@@ -1,30 +1,30 @@
 <?php
 header('Content-Type: application/json');
 
-// --- Error Handling ---
-// Fängt Fehler ab und sendet sie als JSON, damit das Frontend nicht abstürzt
 set_error_handler(function($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) return;
     echo json_encode(["error" => "PHP Error: $message in line $line", "text" => ""]);
     exit;
 });
+// Faengt Errors ab und sendet sie als JSON, damit das Frontend nicht abstürzt
 
 set_exception_handler(function($e) {
     echo json_encode(["error" => "Exception: " . $e->getMessage(), "text" => ""]);
     exit;
 });
+// Faengt Exceptions ab und sendet sie als JSON, damit das Frontend nicht abstürzt
+// Beachte: Exceptions != Error
 
 session_start();
 
-// --- Importe ---
 require_once __DIR__ . '/../classes/Angriffsrichtung.php';
 require_once __DIR__ . '/../classes/Blockrichtung.php';
 require_once __DIR__ . '/../classes/Waffenart.php';
 require_once __DIR__ . '/../classes/Charakter.php';
 require_once __DIR__ . '/../classes/Spieler.php';
 require_once __DIR__ . '/../classes/Gegner.php';
+// Klassen und ENUMs importieren
 
-// --- KONFIGURATION ---
 $gegnerListe = [
     0 => [
         'name' => 'Dundun', 'max_hp' => 100,
@@ -45,21 +45,23 @@ $gegnerListe = [
         'loot' => ['id' => 4, 'amount' => 1, 'name' => 'Magie'] 
     ]
 ];
+// Gegner Konfig fuer leichte Anpassung
 
 $spielerMaxHP = 250; 
 
-// Start-Inventar (Waffen-ID => Anzahl Nutzungen)
 $startInventar = [
-    0 => 9999, // Faust
-    1 => 9999, // Dolch
+    0 => 9999, // Faust -> Hat man halt und kann nicht aufgebraucht werden
+    1 => 9999, // Dolch -> siehe geschmackloser Kommentar in ENUM
     2 => 5,    // Schwert
     3 => 2,    // Laser
-    4 => 1     // Magie
+    4 => 1     // Magie -> Ult basically => nur ein Mal zu benutzen
 ];
+// Hier werden die Waffen IDs auf die Anzahl der Nutzungen gemappt (referenziert)
+// z.B. ID 2 ist das Schwert und es bekommt 5 Verwendungen zugeordnet
 
 $result = ["error" => "", "text" => "", "inventory" => []];
+// Vorbereitung der Ausgabe an JSON
 
-// Deterministischer Modus
 if (isset($_POST['cbAbsolutMode'])) $_SESSION['cbAbsolutMode'] = true;
 elseif (isset($_POST)) $_SESSION['cbAbsolutMode'] = false;
 $global__game_deterministic = $_SESSION['cbAbsolutMode'] ?? false;
@@ -67,7 +69,6 @@ $global__game_deterministic = $_SESSION['cbAbsolutMode'] ?? false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // --- 1. SETUP & RESET ---
     if (!isset($_SESSION['player_hp']) || $_SESSION['player_hp'] <= 0 || !isset($_SESSION['stage'])) {
         $_SESSION['player_hp'] = $spielerMaxHP;
         $_SESSION['stage'] = 0;
@@ -78,14 +79,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $textPrefix = "";
     }
     
-    // Nach Sieg Reset prüfen
     if ($_SESSION['stage'] >= count($gegnerListe)) {
         session_destroy();
         echo json_encode(["text" => "<b>Spiel vorbei!</b> Bitte Seite neu laden.", "finished" => true]);
         exit;
     }
 
-    // --- 2. EINGABEN & INVENTAR PRÜFUNG ---
     $postWaffe = $_POST['waffe'] ?? "";
     $auswahl_waffe = Waffenart::fromString($postWaffe);
     $auswahl_verteidigung = Blockrichtung::fromString($_POST['block'] ?? "");
@@ -95,31 +94,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         throw new Exception("Bitte alle Befehle erteilen!");
     }
 
-    // Munition prüfen!
     $waffenID = $auswahl_waffe->get_ID();
     $currentAmmo = $_SESSION['inventory'][$waffenID] ?? 0;
 
     if ($currentAmmo <= 0) {
-        $auswahl_waffe = Waffenart::FAUST(); // Fallback auf Faust
+        $auswahl_waffe = Waffenart::FAUST();
         $textPrefix .= "<i>Klick... Leer! Keine Munition mehr! Du nutzt deine Fäuste.</i><br>";
     } else {
-        // Munition abziehen (außer bei Unendlich-Waffen)
         if ($_SESSION['inventory'][$waffenID] < 1000) {
             $_SESSION['inventory'][$waffenID]--;
         }
     }
 
-    // --- 3. KAMPF START ---
     $currentStage = $_SESSION['stage'];
     $gegnerDaten = $gegnerListe[$currentStage];
 
-    // Spieler erstellen (Werte leicht erhöht für Fairness)
     $spieler = new Spieler("Held", $_SESSION['player_hp'], 12, 1.2, 1.5);
     $spieler->setWaffenart($auswahl_waffe);
     $spieler->setBlockrichtung($auswahl_verteidigung);
     $spieler->setAngriffsrichtung($auswahl_angriff);
 
-    // Gegner erstellen
     $gegner = new Gegner($gegnerDaten['name'], $_SESSION['enemy_hp'], $gegnerDaten['str'], $gegnerDaten['dex'], $gegnerDaten['int']);
     
     // Zufällige Gegner-Waffe & Taktik
@@ -128,37 +122,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gegner->setBlockrichtung(Blockrichtung::fromID(rand(0, 2)));
     $gegner->setAngriffsrichtung(Angriffsrichtung::fromID(rand(0, 2)));
 
-
-    // --- 4. BERECHNUNG ---
     $log = $textPrefix;
 
-    // A) Spieler greift an
     $schadA = $spieler->getAschadenAusAngriffswerte(); // Hier war vorher der Fehler ($schadA_Spieler)
     
-    // Verteidigung berechnen
     $schadRealG = $gegner->getVschadenAusVerteidigungswerte($schadA, $spieler->getAngriffsrichtung());
     
-    // HP abziehen
     $gegner->setLebenspunkte($gegner->getLebenspunkte() - $schadRealG);
     $_SESSION['enemy_hp'] = $gegner->getLebenspunkte();
 
-    // Log schreiben
     $log .= "Du nutzt <b>{$auswahl_waffe->get_DisplayName()}</b>.<br>";
     
-    // Crit Anzeige (Prüfung auf Property aus Charakter.php)
     if (isset($spieler->hatGecritted) && $spieler->hatGecritted) {
         $log .= "<b style='color:orange'>🔥 KRITISCHER TREFFER!</b><br>";
     }
 
     $log .= "{$gegner->getName()} nimmt <b style='color:green'>{$schadRealG}</b> Schaden.<br>";
 
-
-    // B) Gegner tot?
     if ($gegner->getLebenspunkte() <= 0) {
         $nextStage = $currentStage + 1;
         
         if (isset($gegnerListe[$nextStage])) {
-            // LOOTEN!
+            // Looten
             $loot = $gegnerDaten['loot'];
             $_SESSION['inventory'][$loot['id']] += $loot['amount'];
 
@@ -180,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_destroy();
         }
     } else {
-        // C) Gegner lebt noch -> Rückschlag
+        // Gegner lebt noch -> Rückschlag
         $log .= "<hr>";
         $schadAG = $gegner->getAschadenAusAngriffswerte();
         
@@ -191,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $log .= "{$gegner->getName()} kontert mit {$gegner->getWaffenart()->get_DisplayName()}!<br>";
         
-        // Optional: Gegner Crit Anzeige (falls Gegner auch critten kann)
+        // Gegner Crit Anzeige (falls Gegner auch critten kann)
         if (isset($gegner->hatGecritted) && $gegner->hatGecritted) {
             $log .= "<b style='color:red'>💥 GEGNER CRIT!</b><br>";
         }
@@ -210,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result["inventory"] = $_SESSION['inventory'];
     
     // Daten für Frontend (Lebensbalken Update)
-    // Wir senden die rohen Zahlen, damit JS die Balken malen kann
+    // Senden der rohen Zahlen, damit JS die Balken erstellen kann
     $result["status"] = [
         "p_hp" => max(0, $_SESSION['player_hp'] ?? 0),
         "p_max" => $spielerMaxHP,
