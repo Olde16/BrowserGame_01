@@ -18,7 +18,7 @@ set_exception_handler(function($e) { echo json_encode(["error" => "Exception: " 
 
 session_start(); // Startet die Sitzung (Speicher)
 
-// Alle Klassen laden
+// Alle Klassen und Enum laden
 require_once __DIR__ . '/../classes/Angriffsrichtung.php';
 require_once __DIR__ . '/../classes/Blockrichtung.php';
 require_once __DIR__ . '/../classes/Waffenart.php';
@@ -32,10 +32,11 @@ $gegnerListe = [
           'waffe' => [Waffenart::FAUST, Waffenart::DOLCH], 'loot' => ['id' => 2, 'amount' => 5, 'name' => 'Schwert']],
     1 => ['name' => 'Dandadan', 'max_hp' => 180, 'str' => 10, 'dex' => 1.4, 'int' => 1.5, 
           'waffe' => [Waffenart::DOLCH, Waffenart::SCHWERT], 'loot' => ['id' => 3, 'amount' => 4, 'name' => 'Laserschwert']],
-    2 => ['name' => 'Mukbang (Endboss)', 'max_hp' => 400, 'str' => 20, 'dex' => 0.9, 'int' => 2.0, 
+    2 => ['name' => 'Mokbang (Endboss)', 'max_hp' => 400, 'str' => 20, 'dex' => 0.9, 'int' => 2.0, 
           'waffe' => [Waffenart::SCHWERT, Waffenart::LASERSCHWERT], 'loot' => ['id' => 4, 'amount' => 1, 'name' => 'Magie']]
 ];
 $spielerMaxHP = 250; 
+// Start Inventar Konfiguration
 $startInventar = [0 => 9999, 1 => 9999, 2 => 5, 3 => 2, 4 => 1];
 
 // Deterministischer Modus ist fest an
@@ -44,7 +45,7 @@ $global__game_deterministic = true;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // --- FEATURE: RESET ---
+    // Feature: Reset
     // Wenn "Reset" gedrückt wurde, alles zurücksetzen
     if (isset($_POST['reset'])) {
         $_SESSION['player_hp'] = $spielerMaxHP;
@@ -53,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['inventory'] = $startInventar; 
         $_SESSION['pact_used'] = false; // Pakt wieder erlauben
         
+        // Es wird JSON übergeben -> richtig codieren
         echo json_encode([
             "text" => "<b>🔄 Spiel wurde zurückgesetzt!</b><br>Alles auf Anfang.",
             "inventory" => $_SESSION['inventory'],
@@ -63,11 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "e_name" => $gegnerListe[0]['name']
             ]
         ]);
-        exit; // Wichtig: Hier aufhören
+        exit; // Hier aufhören für Reset
     }
 
-    // --- INITIALISIERUNG ---
+    // Initialisierung Session Daten
     if (!isset($_SESSION['player_hp']) || $_SESSION['player_hp'] <= 0 || !isset($_SESSION['stage'])) {
+        // player_hp null oder player_hp kleiner 0 oder stage null
         $_SESSION['player_hp'] = $spielerMaxHP;
         $_SESSION['stage'] = 0;
         $_SESSION['enemy_hp'] = $gegnerListe[0]['max_hp'];
@@ -78,22 +81,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Check ob Spiel vorbei
     if ($_SESSION['stage'] >= count($gegnerListe)) {
+        // Wenn stage größer Gegnerliste dann ist Spiel vorbei
         session_destroy();
         echo json_encode(["text" => "<b>Spiel vorbei!</b>", "finished" => true]);
         exit;
     }
     $currentStage = $_SESSION['stage'];
 
-    // --- FEATURE: PAKT MIT DEM TEUFEL ---
+    // Feature: Pakt mit dem Teufel
     if (isset($_POST['gambleOption']) && $_POST['gambleOption'] == "1") {
-        
+        // Variable nicht null und auswahl durch spieler (1)
+
         if (isset($_SESSION['pact_used']) && $_SESSION['pact_used'] === true) {
+            // Variable nicht null und Pakt schon genutzt (true)
             echo json_encode(["error" => "Pakt bereits genutzt!"]); exit;
         }
-        $_SESSION['pact_used'] = true;
+        $_SESSION['pact_used'] = true; // war noch nicht genutzt -> dann ist er es jetzt
 
         $log = $textPrefix . "<b>😈 Pakt mit dem Teufel...</b><br>";
-        if (rand(1, 100) > 50) {
+        if (rand(1, 100) > 50) { 
+            // 50/50 Chance dass es gut geht
             // Gewinn
             $heilung = 150;
             $_SESSION['player_hp'] = min($spielerMaxHP, $_SESSION['player_hp'] + $heilung);
@@ -116,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         echo json_encode([
+            // Wie oben auch hier ausgabe korrekt codieren
             "text" => $log,
             "inventory" => $_SESSION['inventory'],
             "pact_used" => true,
@@ -128,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // --- NORMALE RUNDE START ---
+    // Runde Start:
     
     // 1. Eingaben holen
     $postWaffe = $_POST['waffe'] ?? "";
@@ -156,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $gegner = new Gegner($gegnerDaten['name'], $_SESSION['enemy_hp'], $gegnerDaten['str'], $gegnerDaten['dex'], $gegnerDaten['int']);
     
-    // KI Aktionen
+    // NPC Aktionen
     $rndWaffe = $gegnerDaten['waffe'][array_rand($gegnerDaten['waffe'])];
     $gegner->setWaffenart($rndWaffe::fromID($rndWaffe->get_ID()));
     $gegner->setBlockrichtung(Blockrichtung::fromID(rand(0, 2)));
@@ -181,8 +189,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // B) Gegner besiegt?
     if ($gegner->getLebenspunkte() <= 0) {
+        // Lebt der Gegner noch?
         $nextStage = $currentStage + 1;
         if (isset($gegnerListe[$nextStage])) {
+            // Wenn Gegner der x-ten Runde existiert:
             $loot = $gegnerDaten['loot'];
             $_SESSION['inventory'][$loot['id']] += $loot['amount'];
             $heilung = (int)($spielerMaxHP * 0.30);
@@ -194,11 +204,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $log .= "<span style='color:orange'>Loot: {$loot['amount']}x {$loot['name']}!</span><br>";
             $log .= "<hr><b>ACHTUNG:</b> {$gegnerListe[$nextStage]['name']} erscheint!";
         } else {
+            // Keine Gegner mehr in der Liste = Win
             $log .= "<br><h1 style='color:gold'>👑 SIEG!</h1>Du hast alle Gegner besiegt!";
             session_destroy();
         }
     } else {
-        // C) Gegner Konter
+        // C) Gegner Konter wenn nach Angriff überlebt
         $log .= "<hr>";
         $schadAG = $gegner->getAschadenAusAngriffswerte();
         $schadRealS = $spieler->getVschadenAusVerteidigungswerte($schadAG, $gegner->getAngriffsrichtung());
@@ -217,6 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     echo json_encode([
+        // Und wieder schick ausgeben
         "text" => $log,
         "inventory" => $_SESSION['inventory'],
         "pact_used" => $_SESSION['pact_used'] ?? false,
