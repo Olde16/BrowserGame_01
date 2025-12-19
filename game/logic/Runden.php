@@ -1,6 +1,10 @@
 <?php
 // DATEI: logic/Runden.php
 
+// Zusatz Funktionen
+// Pakt mit dem Teufel Mechanik, Loot basiertes Inverntar, Headshot (Crit), Reset Knopf
+
+
 // Header setzen, damit der Browser weiß: Hier kommt JSON (Daten), kein HTML.
 header('Content-Type: application/json');
 
