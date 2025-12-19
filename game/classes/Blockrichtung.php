@@ -1,5 +1,5 @@
 <?php
-// DATEI: classes/Blockrichtung.php
+// Blockrichtung.php
 
 enum Blockrichtung {
     case OBEN;

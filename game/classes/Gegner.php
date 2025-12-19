@@ -1,5 +1,5 @@
 <?php
-// DATEI: classes/Gegner.php
+// Gegner.php
 require_once __DIR__ . '/Charakter.php';
 
 class Gegner extends Charakter {

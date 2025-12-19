@@ -1,5 +1,5 @@
 <?php
-// DATEI: classes/Angriffsrichtung.php
+// Angriffsrichtung.php
 
 enum Angriffsrichtung {
     case OBEN;

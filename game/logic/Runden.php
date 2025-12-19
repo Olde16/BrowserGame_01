@@ -1,5 +1,5 @@
 <?php
-// DATEI: logic/Runden.php
+// Runden.php
 
 // Zusatz Funktionen
 // Pakt mit dem Teufel Mechanik, Loot basiertes Inverntar, Headshot (Crit), Reset Knopf

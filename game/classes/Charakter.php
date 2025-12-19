@@ -1,5 +1,5 @@
 <?php
-// DATEI: classes/Charakter.php
+// Charakter.php
 
 // "abstract" heißt, diese Klasse ist nur eine Vorlage. Man kann sie nicht direkt "new" machen.
 abstract class Charakter

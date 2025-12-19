@@ -1,5 +1,5 @@
 <?php
-// DATEI: classes/Waffenart.php
+// Waffenart.php
 
 enum Waffenart {
     // Die verfügbaren Typen
