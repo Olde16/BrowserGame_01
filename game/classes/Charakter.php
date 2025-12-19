@@ -1,7 +1,11 @@
 <?php
+// DATEI: classes/Charakter.php
 
+// "abstract" heißt, diese Klasse ist nur eine Vorlage. Man kann sie nicht direkt "new" machen.
 abstract class Charakter
 {
+    // Konstruktor: Setzt die Startwerte beim Erstellen eines Spielers/Gegners.
+    // Wir nutzen "private Properties", damit niemand von außen die Werte kaputt macht.
     public function __construct(
         private string $Name,
         private int $Lebenspunkte,
@@ -12,52 +16,60 @@ abstract class Charakter
         private Blockrichtung $Blockrichtung = Blockrichtung::UNTEN,
         private Angriffsrichtung $angriffsrichtung = Angriffsrichtung::UNTEN
     ) {}
-    // Konstruktor mit Vorgabewerten
 
+    public function __destruct() {}
+
+    // Status-Variablen für das Text-Log (damit wir wissen, was passiert ist)
+    public bool $hatGecritted = false;   // Kritischer Treffer?
+    public bool $hatAusgewichen = false; // Lucky Dodge?
+
+    // --- Getter & Setter (Standard-Methoden um Werte zu lesen/schreiben) ---
     public function getName(): string { return $this->Name; }
-    public function setName(string $value): void { $this->Name = $value; }
-    // Name
-
     public function getLebenspunkte(): int { return $this->Lebenspunkte; }
+    // setLebenspunkte wird benutzt, wenn Schaden genommen wurde.
     public function setLebenspunkte(int $value): void { $this->Lebenspunkte = $value; }
-    // Lebenspunkte
-
+    
     public function getStaerke(): int { return $this->Staerke; }
-    public function setStaerke(int $value): void { $this->Staerke = $value; }
-    // Staerke
-
     public function getGeschick(): float { return $this->Geschick; }
-    public function setGeschick(float $value): void { $this->Geschick = $value; }
-    // Geschick
-
     public function getIntelligenz(): float { return $this->Intelligenz; }
-    public function setIntelligenz(float $value): void { $this->Intelligenz = $value; }
-    // Intellenz
-
+    
     public function getWaffenart(): Waffenart { return $this->Waffenart; }
     public function setWaffenart(Waffenart $value): void { $this->Waffenart = $value; }
-    // Waffenart
-
+    
     public function getBlockrichtung(): Blockrichtung { return $this->Blockrichtung; }
     public function setBlockrichtung(Blockrichtung $value): void { $this->Blockrichtung = $value; }
-    // Blockrichtung
-
+    
     public function getAngriffsrichtung(): Angriffsrichtung { return $this->angriffsrichtung; }
     public function setAngriffsrichtung(Angriffsrichtung $value): void { $this->angriffsrichtung = $value; }
-    // Angriffsrichtung
 
-    public bool $hatGecritted = false;
 
+    // --- ANGRIFFS-BERECHNUNG ---
     public function getAschadenAusAngriffswerte(): int
     {
+        // 1. Basis-Schaden aus den Attributen
         $basisSchaden = ($this->Staerke * $this->Geschick * $this->Intelligenz);
-        $gesamtSchaden = $basisSchaden + $this->Waffenart->get_schaden();
+        // 2. Waffenschaden dazu
+        $waffenSchaden = $this->Waffenart->get_schaden();
+        
+        // FEATURE: HEADSHOT (Risiko-Mechanik)
+        // Wenn man nach OBEN schlägt, trifft man schwerer (weniger Basis-Schaden),
+        // hat aber eine viel höhere Chance auf kritische Treffer.
+        if ($this->angriffsrichtung == Angriffsrichtung::OBEN) {
+            $basisSchaden *= 0.8; // 20% weniger Wucht
+            $bonusCritChance = 25; // Aber +25% Crit-Chance
+        } else {
+            $bonusCritChance = 0;
+        }
 
-        $critChance = $this->Geschick * 10; 
-        $zufall = rand(0, 100);
+        $gesamtSchaden = $basisSchaden + $waffenSchaden;
 
-        if ($zufall < $critChance) {
-            $gesamtSchaden *= 2; // Doppelter Schaden bei Crit
+        // FEATURE: KRITISCHER TREFFER
+        // Chance = Geschick * 15 (z.B. 1.2 * 15 = 18%) + evtl. Headshot-Bonus
+        $critChance = ($this->Geschick * 15) + $bonusCritChance; 
+        
+        // Würfeln (0-100)
+        if (rand(0, 100) < $critChance) {
+            $gesamtSchaden *= 2; // Doppelter Schaden!
             $this->hatGecritted = true;
         } else {
             $this->hatGecritted = false;
@@ -65,40 +77,41 @@ abstract class Charakter
 
         return (int) $gesamtSchaden;
     }
-    // aus eigenen angriffsrelevanten Werten den Angriff ermitteln
 
+    // --- VERTEIDIGUNGS-BERECHNUNG ---
     public function getVschadenAusVerteidigungswerte(int $schadenInput, Angriffsrichtung $angrRichtung): int
     {
+        // Wir holen den Block-Faktor (0.0 = Volltreffer, 1.0 = Geblockt, 0.5 = Dodge)
         $blockFaktor = $this->getBlockEffektivwert($angrRichtung);
         
-        // Berechnung: Schaden * Blockfaktor (z.B. 1.0 = 100% geblockt) + Intelligenz als Rüstung
+        // Schaden reduzieren (Block + Intelligenz als Rüstung)
         $reduktion = ($schadenInput * $blockFaktor) + $this->Intelligenz;
         
-        // max(0, ...) verhindert dass man durch Angriff geheilt wird (negativer Schaden)
+        // Verhindern, dass Schaden negativ wird (Heilung durch Schaden)
         return (int) max(0, $schadenInput - $reduktion);
     }
-    // Mit Übergabe von Angriffsrichtung und Schadenshöhe des Gegners wird die eigene Verteidigung ermittelt
 
+    // Interne Logik für Blocken und Ausweichen
     private function getBlockEffektivwert(Angriffsrichtung $angr): float
     {
-        global $global__game_deterministic;
-        $deterministic = $global__game_deterministic ?? false; // false = Fallback, falls Variable fehlt
+        $this->hatAusgewichen = false; // Reset Status
 
-        $blockId = $this->Blockrichtung->get_ID();
-        $angrId  = $angr->get_ID();
-
-        if ($blockId !== $angrId) {
-            return 0.0; 
+        // 1. Perfekter Block: Richtungen stimmen überein
+        if ($this->Blockrichtung->get_ID() === $angr->get_ID()) {
+            return 1.0; // 100% Absorbiert
         }
+
+        // 2. FEATURE: LUCKY DODGE (Ausweichen)
+        // Wenn Richtung falsch, würfeln wir auf Geschick.
+        $dodgeChance = $this->Geschick * 15;
         
-        if ($deterministic) {
-            // Ist man im deterministischen Modus bei richtiger Richtung wird 100% geblockt
-            return 1.0; 
+        if (rand(0, 100) < $dodgeChance) {
+            $this->hatAusgewichen = true; 
+            return 0.5; // Glück gehabt! 50% Schaden vermieden.
         }
 
-        // Im Zufallsmodus kann man "ausrutschen" auch wenn richtig geblockt wird
-        // -> zufaelliger Faktor (0.0 bis 1.0)
-        return (float) (rand(50, 100) / 100); // Blockt zwischen 50% und 100% des Schadens
+        // 3. Pech gehabt: Voller Schaden
+        return 0.0; 
     }
-    // Je nach Blockrichtung und globalen Einstellungen wird der Block-Faktor ermittelt. Er ist ausschlaggebend fuer die Effektivitaet des Angriffs
 }
+?>

@@ -1,12 +1,9 @@
 <?php
-
+// DATEI: classes/Spieler.php
 require_once __DIR__ . '/Charakter.php';
 
 class Spieler extends Charakter {
-    private string $klasse = "Spieler";
-
-    public function getKlasse(): string {
-        return $this->klasse;
-    }
+    // Erbt alle Eigenschaften und Methoden von Charakter.
+    // Spezifisch für den Spieler.
 }
-// Gegner erbt Charakter und bietet weitere Ausbaumöglichkeiten
+?>
